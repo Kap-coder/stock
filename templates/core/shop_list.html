@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Mes Entreprises - ShopManager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-800">Mes Entreprises</h2>
+        <a href="{% url 'shop_add' %}" class="px-4 py-2 bg-primary text-white rounded-md shadow hover:bg-indigo-700">
+            + Nouvelle Boutique
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div
+            class="p-3 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <ul class="divide-y divide-gray-200">
+            {% for item in shops_data %}
+            <li>
+                <div class="px-4 py-4 sm:px-6 flex items-center justify-between hover:bg-gray-50 transition">
+                    <div class="flex flex-col">
+                        <div class="flex items-center">
+                            <i class="fas fa-store text-gray-400 mr-3 text-xl"></i>
+                            <p class="text-sm font-medium text-indigo-600 truncate">{{ item.shop.name }}</p>
+                            {% if item.is_current %}
+                            <span
+                                class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Actif
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            Plan: {{ item.shop.get_plan_display }} | Ventes Aujourd'hui: {{ item.sales_today }} FCFA
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        {% if not item.is_current %}
+                        <a href="{% url 'shop_switch' item.shop.id %}"
+                            class="text-sm text-indigo-600 hover:text-indigo-900 font-bold border border-indigo-600 px-3 py-1 rounded">
+                            Gérer cette boutique
+                        </a>
+                        {% else %}
+                        <span class="text-sm text-gray-400 italic">En cours d'utilisation</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

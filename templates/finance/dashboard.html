@@ -1,0 +1,129 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Comptabilité - ShopManager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-800">Comptabilité</h2>
+        {% if is_pro %}
+        <a href="{% url 'export_accounting_pdf' %}"
+            class="px-4 py-2 bg-red-600 text-white rounded-md shadow hover:bg-red-700 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            Exporter le Rapport PDF
+        </a>
+        {% else %}
+        <a href="{% url 'plans' %}"
+            class="px-4 py-2 bg-gray-100 text-gray-500 rounded-md shadow hover:bg-gray-200 flex items-center gap-2 group border border-gray-300">
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            <span>Exporter le Rapport PDF <span
+                    class="text-xs ml-1 px-1 bg-yellow-100 text-yellow-800 rounded border border-yellow-200">PRO</span></span>
+            <i class="fas fa-lock ml-1 text-xs text-gray-400"></i>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Chiffre d'affaires -->
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
+            <p class="text-gray-500 text-sm font-medium">Chiffre d'Affaires</p>
+            <p class="text-2xl font-bold text-gray-900 mt-2">{{ total_sales }} FCFA</p>
+        </div>
+
+        <!-- Marge Brute -->
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500">
+            <p class="text-gray-500 text-sm font-medium">Marge Brute</p>
+            <p class="text-2xl font-bold text-gray-900 mt-2">{{ gross_profit }} FCFA</p>
+        </div>
+
+        <!-- Dépenses -->
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
+            <p class="text-gray-500 text-sm font-medium">Dépenses Totales</p>
+            <p class="text-2xl font-bold text-gray-900 mt-2">{{ total_expenses }} FCFA</p>
+        </div>
+
+        <!-- Profit -->
+        <div
+            class="bg-white p-6 rounded-lg shadow border-l-4 {% if profit >= 0 %}border-blue-500{% else %}border-gray-500{% endif %}">
+            <p class="text-gray-500 text-sm font-medium">Résultat Net</p>
+            <p class="text-2xl font-bold {% if profit >= 0 %}text-blue-600{% else %}text-red-600{% endif %} mt-2">{{ profit }} FCFA</p>
+        </div>
+    </div>
+
+    <!-- Detailed P&L (Profit & Loss) -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Compte de Résultat Simplifié (P&L)</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Vue d'ensemble de la rentabilité.</p>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <table class="min-w-full">
+                <tbody class="divide-y divide-gray-200">
+                    <!-- Revenue -->
+                    <tr>
+                        <td class="py-2 text-sm text-gray-700">Chiffre d'Affaires</td>
+                        <td class="py-2 text-sm font-bold text-gray-900 text-right">{{ total_sales }} FCFA</td>
+                    </tr>
+                    <!-- COGS -->
+                    <tr>
+                        <td class="py-2 text-sm text-gray-600 pl-4">- Coût des marchandises vendues (COGS)</td>
+                        <td class="py-2 text-sm text-gray-600 text-right">({{ cogs }}) FCFA</td>
+                    </tr>
+                    <!-- Gross Profit -->
+                    <tr class="bg-yellow-50">
+                        <td class="py-2 text-sm font-bold text-yellow-800">Marge Brute</td>
+                        <td class="py-2 text-sm font-bold text-yellow-800 text-right">{{ gross_profit }} FCFA</td>
+                    </tr>
+
+                    <!-- Expenses -->
+                    <tr>
+                        <td class="py-4 text-sm font-bold text-gray-700 underline">Dépenses Opérationnelles</td>
+                        <td></td>
+                    </tr>
+                    {% for exp in expense_breakdown %}
+                    <tr>
+                        <td class="py-1 text-sm text-gray-600 pl-4">- {{ exp.category }}</td>
+                        <td class="py-1 text-sm text-gray-600 text-right">({{ exp.total }}) FCFA</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="py-1 text-sm text-gray-500 pl-4 italic">Aucune dépense enregistrée.</td>
+                        <td></td>
+                    </tr>
+                    {% endfor %}
+
+                    <!-- Total Expenses -->
+                    <tr class="bg-red-50">
+                        <td class="py-2 text-sm font-bold text-red-800">Total Dépenses</td>
+                        <td class="py-2 text-sm font-bold text-red-800 text-right">({{ total_expenses }}) FCFA</td>
+                    </tr>
+
+                    <!-- Net Income -->
+                    <tr class="bg-gray-100 border-t-2 border-gray-300">
+                        <td class="py-4 text-base font-bold text-gray-900">RÉSULTAT NET</td>
+                        <td
+                            class="py-4 text-base font-bold {% if profit >= 0 %}text-blue-600{% else %}text-red-600{% endif %} text-right">
+                            {{ profit }} FCFA
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <a href="{% url 'expense_list' %}" class="text-indigo-600 font-medium hover:text-indigo-800">
+            Gérer les dépenses &rarr;
+        </a>
+    </div>
+</div>
+{% endblock %}

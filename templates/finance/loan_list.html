@@ -1,0 +1,144 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Prêts Clients - ShopManager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-800">Prêts & Créances Clients</h2>
+    </div>
+
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div
+            class="p-3 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tabs or Sections -->
+    <div x-data="{ tab: 'loans' }" class="space-y-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button @click="tab = 'loans'"
+                    :class="{'border-primary text-primary': tab === 'loans', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'loans'}"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Prêts Accordés (Clients doivent)
+                </button>
+                <button @click="tab = 'debts'"
+                    :class="{'border-red-500 text-red-600': tab === 'debts', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'debts'}"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Dettes Boutique (On doit aux Clients)
+                </button>
+            </nav>
+        </div>
+
+        <!-- Loans Table -->
+        <div x-show="tab === 'loans'" class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Liste des Créances</h3>
+                <a href="{% url 'loan_add' %}?type=LOAN"
+                    class="px-3 py-1 bg-primary text-white text-sm rounded shadow hover:bg-indigo-700">+ Nouveau
+                    Prêt</a>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reste</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for loan in loans %}
+                    <tr>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ loan.customer.name }}</div>
+                            <div class="text-xs text-gray-500">{{ loan.customer.phone }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ loan.amount }}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-red-600">{{ loan.remaining_amount }}</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if loan.status == 'PAID' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ loan.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {% if loan.status != 'PAID' %}
+                            <form action="{% url 'loan_repay' loan.id %}" method="POST" class="flex gap-2">
+                                {% csrf_token %}
+                                <input type="number" name="amount" class="w-20 text-xs border rounded"
+                                    placeholder="Montant">
+                                <button type="submit" class="text-green-600 font-bold text-xs">Encaisser</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Aucun prêt.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Debts Table -->
+        <div x-show="tab === 'debts'" class="bg-white shadow overflow-hidden sm:rounded-lg" style="display: none;">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center bg-red-50">
+                <h3 class="text-lg leading-6 font-medium text-red-900">Liste des Dettes (À Payer)</h3>
+                <a href="{% url 'loan_add' %}?type=DEBT"
+                    class="px-3 py-1 bg-red-600 text-white text-sm rounded shadow hover:bg-red-700">+ Nouvelle Dette</a>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créancier (Client)
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant Dû</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reste à Payer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for debt in debts %}
+                    <tr>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ debt.customer.name }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ debt.amount }}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-red-600">{{ debt.remaining_amount }}</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if debt.status == 'PAID' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ debt.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {% if debt.status != 'PAID' %}
+                            <form action="{% url 'loan_repay' debt.id %}" method="POST" class="flex gap-2">
+                                {% csrf_token %}
+                                <input type="number" name="amount" class="w-20 text-xs border rounded"
+                                    placeholder="Montant">
+                                <button type="submit" class="text-red-600 font-bold text-xs">Rembourser</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Aucune dette.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endblock %}

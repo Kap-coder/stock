@@ -1,0 +1,84 @@
+{% extends 'base/base_public.html' %}
+
+{% block title %}Inscription - G-Business{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 overflow-y-auto">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">
+            Créez votre boutique
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Rejoignez des milliers de commerçants.
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md pb-8">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" method="POST">
+                {% csrf_token %}
+
+                <div>
+                    <label for="shop_name" class="block text-sm font-medium text-gray-700">Nom de la boutique</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-store text-gray-400"></i>
+                        </div>
+                        <input id="shop_name" name="shop_name" type="text" required placeholder="Ma Super Boutique"
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-3 border">
+                    </div>
+                </div>
+
+
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input id="username" name="username" type="text" required placeholder="user123"
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-3 border">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Doit être unique.</p>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input id="email" name="email" type="email" required placeholder="contact@example.com"
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-3 border">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required placeholder="••••••••"
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-3 border">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        Créer ma boutique
+                    </button>
+                </div>
+
+                <div class="text-center text-sm">
+                    <a href="{% url 'login' %}" class="font-medium text-primary hover:text-indigo-500">
+                        Déjà un compte ? Connectez-vous
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base/base_public.html' %}
+
+{% block title %}Bienvenue - ShopManager{% endblock %}
+
+{% block content %}
+<div class="h-screen w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative" x-data="onboarding()">
+
+        <!-- Slides -->
+        <div class="relative h-[500px]">
+
+            <!-- Slide 1: Welcome -->
+            <div x-show="step === 1" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-indigo-100 rounded-full flex items-center justify-center mb-6 text-indigo-600">
+                    <i class="fas fa-store text-5xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bienvenue !</h2>
+                <p class="text-gray-500">G-Business est la solution tout-en-un pour gérer votre boutique simplement.
+                </p>
+            </div>
+
+            <!-- Slide 2: Stock -->
+            <div x-show="step === 2" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600">
+                    <i class="fas fa-boxes text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Gestion de Stock</h2>
+                <p class="text-gray-500">Suivez vos produits en temps réel. Soyez alerté quand le stock est faible.</p>
+            </div>
+
+            <!-- Slide 3: POS -->
+            <div x-show="step === 3" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600">
+                    <i class="fas fa-cash-register text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Point de Vente</h2>
+                <p class="text-gray-500">Encaissez vos clients rapidement via une interface tactile intuitive.</p>
+            </div>
+
+            <!-- Slide 4: Invoices -->
+            <div x-show="step === 4" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600">
+                    <i class="fas fa-file-invoice-dollar text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Facturation Auto</h2>
+                <p class="text-gray-500">Générez et imprimez des factures professionnelles pour chaque vente ou sortie d'argent.</p>
+            </div>
+
+            <!-- Slide 6: Accounting -->
+            <div x-show="step === 7" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-purple-100 rounded-full flex items-center justify-center mb-6 text-purple-600">
+                    <i class="fas fa-chart-pie text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Comptabilité</h2>
+                <p class="text-gray-500">Suivez vos profits et dépenses. Prenez les bonnes décisions.</p>
+                <a href="{% url 'register' %}"
+                    class="mt-8 px-8 py-3 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-indigo-700 transform hover:scale-105 transition">
+                    Créer ma boutique 
+                </a>
+            </div>
+
+            <!-- Slide 5: Accounting -->
+            <div x-show="step === 5" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-purple-100 rounded-full flex items-center justify-center mb-6 text-purple-600">
+                    <i class="fas fa-dollar text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">credit client et dette</h2>
+                <p class="text-gray-500">Consigner toutes vos dettes et tous ce qu'on vous doit comme revenu pour un suivi detaille.</p>
+            </div>
+
+             <!-- Slide 5: Impots -->
+            <div x-show="step === 6" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-x-12" x-transition:enter-end="opacity-100 translate-x-0"
+                class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-32 h-32 bg-purple-100 rounded-full flex items-center justify-center mb-6 text-purple-600">
+                    <i class="fas fa-scale-balanced text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Impots</h2>
+                <p class="text-gray-500">Gerer vos impots a payer facilement et soyer dans les regle sans vous faire arnaquer.</p>
+            </div>
+
+        </div>
+
+        <!-- Navigation Dots -->
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-2">
+            <template x-for="i in 7">
+                <button @click="step = i" :class="{'bg-primary w-6': step === i, 'bg-gray-300': step !== i}"
+                    class="w-2 h-2 rounded-full transition-all duration-300"></button>
+            </template>
+        </div>
+
+        <!-- Next Button (hidden on last slide) -->
+        <button x-show="step < 7" @click="step++"
+            class="absolute bottom-8 right-8 text-gray-400 hover:text-primary transition">
+            <i class="fas fa-arrow-right text-xl"></i>
+        </button>
+
+    </div>
+</div>
+
+<!-- Alpine.js for interactions -->
+<script src="//unpkg.com/alpinejs" defer></script>
+<script>
+    function onboarding() {
+        return {
+            step: 1
+        }
+    }
+</script>
+{% endblock %}

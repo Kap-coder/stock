@@ -1,0 +1,44 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Upgrade Pro+ - ShopManager{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col items-center justify-center p-6 text-center">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden p-8 border border-purple-200">
+        <div class="h-20 w-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-crown text-3xl text-purple-600"></i>
+        </div>
+
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Plan Pro+ Requis</h2>
+        <p class="text-gray-500 mb-6">Cette fonctionnalité est réservée aux abonnés du plan Pro+.</p>
+
+        <div class="space-y-4 mb-8 text-left">
+            <div class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3"></i>
+                <span class="text-gray-700">Gestion complète des Impôts</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3"></i>
+                <span class="text-gray-700">Support prioritaire VIP</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-3"></i>
+                <span class="text-gray-700">Toutes les fonctionnalités Pro</span>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <span class="text-4xl font-bold text-gray-900">20 000</span>
+            <span class="text-gray-500 text-lg"> FCFA / mois</span>
+        </div>
+
+        <a href="https://wa.me/237690000000?text=Je%20veux%20passer%20au%20plan%20Pro%2B" target="_blank"
+            class="block w-full py-3 px-4 rounded-md shadow bg-purple-600 text-white font-bold hover:bg-purple-700 transition">
+            Passer à Pro+
+        </a>
+        <a href="{% url 'dashboard' %}" class="block mt-4 text-sm text-gray-500 hover:text-gray-700">
+            Non merci, retourner au tableau de bord
+        </a>
+    </div>
+</div>
+{% endblock %}

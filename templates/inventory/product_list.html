@@ -1,0 +1,99 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Produits - ShopManager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <h2 class="text-2xl font-bold text-gray-800">Mes Produits</h2>
+        <a href="{% url 'product_add' %}" class="px-4 py-2 bg-primary text-white rounded-md shadow hover:bg-indigo-700">
+            + Ajouter Produit
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white p-4 rounded-lg shadow">
+        <form method="GET" class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-medium text-gray-700">Rechercher</label>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Nom du produit..."
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border">
+            </div>
+
+            {% if user.shop.is_pro %}
+            <div class="w-48">
+                <label class="block text-xs font-medium text-gray-700">Catégorie</label>
+                <select name="category"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border">
+                    <option value="">Toutes</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center h-10 pb-1">
+                <input type="checkbox" name="low_stock" id="low_stock" value="1" {% if request.GET.low_stock %}checked{% endif %} class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <label for="low_stock" class="ml-2 block text-sm text-gray-900">Stock Faible</label>
+            </div>
+
+            <button type="submit"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-medium text-sm">
+                Filtrer
+            </button>
+
+            {% if request.GET.q or request.GET.category or request.GET.low_stock %}
+            <a href="{% url 'product_list' %}" class="text-red-600 hover:text-red-800 text-sm">Réinitialiser</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="bg-white shadow overflow-x-auto sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix
+                        Achat</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix
+                        Vente</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for product in products %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ product.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.purchase_price }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.selling_price }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if product.quantity <= product.alert_threshold %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                            {{ product.quantity }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Modifier</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Aucun produit.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

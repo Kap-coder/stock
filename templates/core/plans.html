@@ -1,0 +1,71 @@
+{% extends 'base/base_public.html' %}
+
+{% block title %}Nos Offres - ShopManager{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                Des tarifs adaptés à votre croissance
+            </h2>
+            <p class="mt-4 text-xl text-gray-600">
+                Commencez gratuitement et évoluez selon vos besoins.
+            </p>
+        </div>
+
+        <div
+            class="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
+            {% for plan in plans %}
+            <div
+                class="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200 bg-white flex flex-col {% if plan.is_popular %}ring-2 ring-primary relative{% endif %}">
+                {% if plan.is_popular %}
+                <div
+                    class="absolute top-0 right-0 -mt-3 -mr-3 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full shadow">
+                    POPULAIRE
+                </div>
+                {% endif %}
+
+                <div class="p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ plan.name }}</h3>
+                    <p class="mt-4">
+                        {% if plan.old_price %}
+                        <span class="text-lg text-gray-500 line-through mr-2">{{ plan.old_price }} FCFA</span>
+                        {% endif %}
+                        <span class="text-4xl font-extrabold text-gray-900">{{ plan.price }} FCFA</span>
+                        <span class="text-base font-medium text-gray-500">/mois</span>
+                    </p>
+                    <a href="{% url 'plan_subscribe' plan.id %}"
+                        class="mt-8 block w-full bg-primary border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-indigo-700">
+                        Choisir ce plan
+                    </a>
+                </div>
+                <div class="pt-6 pb-8 px-6 flex-1">
+                    <h4 class="text-sm font-medium text-gray-900 tracking-wide uppercase">Fonctionnalités</h4>
+                    <ul class="mt-6 space-y-4">
+                        {% for feature in plan.features_list %}
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <p class="ml-3 text-sm text-gray-500">{{ feature }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="{% url 'dashboard' %}" class="text-base font-medium text-indigo-600 hover:text-indigo-500">
+                Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

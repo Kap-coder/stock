@@ -1,0 +1,33 @@
+{% load l10n %}
+{% if products %}
+<div class="grid grid-cols-2 gap-4">
+    {% for product in products %}
+    <div class="bg-white p-4 rounded-lg shadow cursor-pointer hover:bg-indigo-50 transition" onclick="addToCart(
+            {{ product.id }},
+            '{{ product.name|escapejs }}',
+            '{{ product.selling_price|stringformat:" .2f" }}', {{ product.quantity }} )">
+        <h4 class="font-bold text-gray-800">{{ product.name }}</h4>
+
+        <div class="flex justify-between items-center mt-2">
+            <span class="text-sm text-gray-500">
+                Stock: {{ product.quantity }}
+            </span>
+            <span class="font-bold text-primary">
+                {{ product.selling_price|localize }}
+            </span>
+        </div>
+
+        <button type="button"
+            class="mt-2 w-full py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 text-sm font-bold relative z-10"
+            onclick="event.stopPropagation(); addToCart(
+                {{ product.id }},
+                '{{ product.name|escapejs }}',
+                '{{ product.selling_price|stringformat:" .2f" }}', {{ product.quantity }} )">
+            Ajouter au panier
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 text-center py-4">Aucun produit trouvé.</p>
+{% endif %}

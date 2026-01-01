@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 10pt;
+        }
+
+        h1 {
+            font-size: 18pt;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 14pt;
+            color: #666;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .amount {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #eee;
+        }
+
+        .profit-positive {
+            color: green;
+        }
+
+        .profit-negative {
+            color: red;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-info">
+        <h1>Rapport Comptable Complet</h1>
+        <p><strong>Boutique :</strong> {{ shop.name }}</p>
+        <p><strong>Généré le :</strong> {% now "d/m/Y H:i" %}</p>
+        <p><strong>Par :</strong> {{ request.user.username }} ({{ request.user.get_role_display }})</p>
+    </div>
+
+    <!-- 1. Résumé Profit & Perte (P&L) -->
+    <div class="section">
+        <h2>1. Compte de Résultat (P&L)</h2>
+        <table>
+            <tr>
+                <th>Poste</th>
+                <th class="amount">Montant (FCFA)</th>
+            </tr>
+            <tr>
+                <td>Chiffre d'Affaires (Ventes Totales)</td>
+                <td class="amount">{{ total_sales|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Coût des Marchandises Vendues (COGS)</td>
+                <td class="amount">-{{ cogs|floatformat:2 }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Marge Brute</td>
+                <td class="amount">{{ gross_profit|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Dépenses Opérationnelles (Charges)</td>
+                <td class="amount">-{{ total_expenses|floatformat:2 }}</td>
+            </tr>
+            <tr class="total-row" style="font-size: 12pt;">
+                <td>Résultat Net</td>
+                <td class="amount {% if net_profit >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                    {{ net_profit|floatformat:2 }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 2. Valeur du Stock -->
+    <div class="section">
+        <h2>2. Valorisation du Stock</h2>
+        <table>
+            <tr>
+                <th>Indicateur</th>
+                <th class="amount">Valeur</th>
+            </tr>
+            <tr>
+                <td>Nombre de Références (Produits)</td>
+                <td class="amount">{{ stock_count }}</td>
+            </tr>
+            <tr>
+                <td>Quantité Totale en Stock</td>
+                <td class="amount">{{ stock_quantity }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Valeur Totale (Prix d'Achat)</td>
+                <td class="amount">{{ stock_value|floatformat:2 }} FCFA</td>
+            </tr>
+            <tr>
+                <td>Valeur Totale (Prix de Vente Potentiel)</td>
+                <td class="amount">{{ stock_value_sell|floatformat:2 }} FCFA</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. Situation des Tiers (Transactions) -->
+    <div class="section">
+        <h2>3. Situation Clients & Dettes</h2>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th class="amount">Montant à Recouvrer / à Payer</th>
+            </tr>
+            <tr>
+                <td>Créances Clients (Prêts accordés non remboursés)</td>
+                <td class="amount" style="color: red;">{{ total_receivables|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Dettes Boutique (Sommes dues aux tiers)</td>
+                <td class="amount" style="color: red;">{{ total_payables|floatformat:2 }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Balance Tiers (Net)</td>
+                <td class="amount">{{ balance_tiers|floatformat:2 }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div id="footerContent">
+        <div style="text-align: center; color: #999; font-size: 8pt;">
+            Page <pdf:pagenumber> / <pdf:pagecount> - ShopManager ERP
+        </div>
+    </div>
+</body>
+
+</html>

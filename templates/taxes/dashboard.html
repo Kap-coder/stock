@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Impôts - G-Business{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col items-center justify-center p-6 text-center">
+    <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden p-10 border border-gray-100">
+        <div class="h-24 w-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-file-invoice-dollar text-4xl text-blue-600"></i>
+        </div>
+
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Gestion des Impôts</h2>
+        <p class="text-xl text-gray-600 mb-8">
+            Simplifiez vos déclarations fiscales avec notre module dédié.
+        </p>
+
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 text-left mb-8">
+            <p class="text-blue-700">
+                <span class="font-bold">Info :</span> Gérez vos impôts ici. Ce module est en cours de déploiement
+                complet. Vous serez notifié des mises à jour.
+            </p>
+        </div>
+
+        <button class="px-6 py-3 bg-gray-300 text-gray-600 rounded-md font-medium cursor-not-allowed" disabled>
+            Nouvelle Déclaration (Bientôt)
+        </button>
+    </div>
+
+    <div class="mt-8 text-sm text-gray-400">
+        Module Impôts - G-Business Pro+<br>
+        Besoin d'aide ? <a href="#" class="text-blue-500 hover:underline">Support VIP</a>
+    </div>
+</div>
+{% endblock %}

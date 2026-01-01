@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Ajouter Dépense - ShopManager{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Nouvelle Dépense</h2>
+
+        <form method="POST" action="{% url 'expense_add' %}" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700">Catégorie</label>
+                <select name="category" id="category"
+                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+                    <option value="Loyer">Loyer</option>
+                    <option value="Salaires">Salaires</option>
+                    <option value="Electricité">Electricité</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700">Montant</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <input type="number" name="amount" id="amount" required min="0" step="0.01"
+                        class="focus:ring-primary focus:border-primary block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md p-2 border">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500 sm:text-sm">FCFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                <input type="date" name="date" id="date" required
+                    class="mt-1 focus:ring-primary focus:border-primary block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description (Optionnel)</label>
+                <textarea name="description" id="description" rows="3"
+                    class="shadow-sm focus:ring-primary focus:border-primary mt-1 block w-full sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                <a href="{% url 'expense_list' %}"
+                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-3">
+                    Annuler
+                </a>
+                <button type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

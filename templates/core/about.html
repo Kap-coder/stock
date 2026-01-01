@@ -1,0 +1,51 @@
+{% extends 'base/base_public.html' %}
+
+{% block title %}À Propos - G-Business{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h1
+            class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600 mb-2">
+            G-Business
+        </h1>
+        <p class="text-xl text-gray-500 font-medium">L'outil de gestion ultime pour votre commerce.</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full border border-gray-100 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Notre Mission</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            Simplifier la vie des commerçants en Afrique et partout ailleurs. G-Business (anciennement ShopManager) vous
+            offre une suite complète pour piloter vos ventes, vos stocks, votre comptabilité et bientôt vos impôts, le
+            tout depuis votre mobile ou ordinateur.
+        </p>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Fonctionnalités Clés</h2>
+        <ul class="text-left space-y-2 mb-6 text-gray-600">
+            <li><i class="fas fa-check text-green-500 mr-2"></i> Point de Vente (POS) ultra-rapide</li>
+            <li><i class="fas fa-check text-green-500 mr-2"></i> Gestion de stock en temps réel</li>
+            <li><i class="fas fa-check text-green-500 mr-2"></i> Comptabilité automatisée</li>
+            <li><i class="fas fa-check text-green-500 mr-2"></i> Gestion multi-boutiques (Pro)</li>
+            <li><i class="fas fa-check text-green-500 mr-2"></i> Module Impôts (Pro+)</li>
+        </ul>
+
+        <div class="mt-8 pt-8 border-t border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Développé par Kapcoder</h3>
+            <p class="text-sm text-gray-500">
+                Une expertise technique au service de votre business.
+            </p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <a href="#" class="text-gray-400 hover:text-blue-600"><i class="fab fa-facebook text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-400"><i class="fab fa-twitter text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-pink-600"><i class="fab fa-instagram text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-800"><i class="fab fa-linkedin text-2xl"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-sm text-gray-400">
+        Version 6.0.0 (Beta)<br>
+        &copy; 2024 Kapcoder. Tous droits réservés.
+    </div>
+</div>
+{% endblock %}
