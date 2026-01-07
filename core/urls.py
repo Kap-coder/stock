@@ -25,4 +25,6 @@ urlpatterns = [
     # Plans Public
     path('plans/', views_plans.plans_view, name='plans'),
     path('plans/<int:plan_id>/subscribe/', views_plans.plan_subscribe, name='plan_subscribe'),
+    # API sync endpoint for PWA offline queue
+    path('api/sync/', views.api_sync, name='api_sync'),
 ]

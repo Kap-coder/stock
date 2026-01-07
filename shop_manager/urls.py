@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import FileResponse, Http404
+import os
 
 from django.contrib import admin
 from django.urls import path, include
@@ -39,6 +41,8 @@ router.register(r'expenses', ExpenseViewSet, basename='expense')
 router.register(r'transactions', TransactionViewSet, basename='transaction')
 
 urlpatterns = [
+    # Expose service worker at site root so it can have origin-wide scope
+    path('sw.js', lambda request: FileResponse(open(os.path.join(settings.BASE_DIR, 'static', 'sw.js'), 'rb'), content_type='application/javascript')),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),

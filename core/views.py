@@ -9,6 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Sum
 from sales.models import Sale
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db import transaction
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -123,6 +127,96 @@ def register(request):
 
 def onboarding(request):
     return render(request, 'core/onboarding.html')
+
+@require_POST
+def api_sync(request):
+    """Endpoint pour recevoir une liste d'opérations (ex: ventes) envoyées depuis la PWA.
+    Attends JSON: { "operations": [ {"type":"sale", "payload": {...} }, ... ] }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=403)
+
+    try:
+        data = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    ops = data.get('operations') if isinstance(data, dict) else data
+    if not isinstance(ops, list):
+        return JsonResponse({'error': 'operations must be a list'}, status=400)
+
+    results = []
+    errors = []
+
+    from sales.models import SaleItem
+    from inventory.models import Product, StockMovement
+
+    for op in ops:
+        try:
+            if op.get('type') == 'sale':
+                payload = op.get('payload') or {}
+                shop = request.user.shop
+                if not shop:
+                    errors.append({'op': op, 'error': 'User has no shop'})
+                    continue
+
+                with transaction.atomic():
+                    sale = Sale.objects.create(shop=shop, cashier=request.user)
+                    total = 0
+                    items = payload.get('items', [])
+                    if not items:
+                        raise ValueError('Aucun article dans la vente.')
+
+                    for it in items:
+                        product_id = it.get('product')
+                        quantity = int(it.get('quantity', 0))
+                        price = it.get('price')
+                        product = None
+                        product_name = it.get('product_name')
+
+                        if product_id:
+                            product = Product.objects.filter(id=product_id, shop=shop).first()
+                            if not product:
+                                raise ValueError(f"Produit {product_id} introuvable ou hors shop.")
+                            if product.quantity < quantity:
+                                raise ValueError(f"Stock insuffisant pour '{product.name}'.")
+                            if price is None:
+                                price = product.selling_price
+                            product_name = product.name
+
+                        if price is None:
+                            price = 0
+
+                        subtotal = quantity * float(price)
+                        SaleItem.objects.create(
+                            sale=sale,
+                            product=product,
+                            product_name=product_name or 'Vente libre',
+                            quantity=quantity,
+                            price=price,
+                            subtotal=subtotal
+                        )
+                        total += subtotal
+
+                        if product:
+                            StockMovement.objects.create(
+                                product=product,
+                                quantity=quantity,
+                                movement_type=StockMovement.MovementType.OUT,
+                                reason=f"Vente #{sale.id}"
+                            )
+                            product.quantity -= quantity
+                            product.save()
+
+                    sale.total_amount = total
+                    sale.save()
+                    results.append({'type': 'sale', 'id': sale.id})
+            else:
+                errors.append({'op': op, 'error': 'Unknown op type'})
+        except Exception as e:
+            errors.append({'op': op, 'error': str(e)})
+
+    return JsonResponse({'created': results, 'errors': errors})
 
 def index(request):
     if request.user.is_authenticated:
