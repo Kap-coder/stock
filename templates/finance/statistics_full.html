@@ -1,0 +1,167 @@
+{% extends 'base/base.html' %}
+
+{% load humanize %}
+
+{% block title %}Statistiques complètes{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-gray-900">Tableau de bord — Statistiques</h1>
+    <div class="text-sm text-gray-500">Dernières données : {{ now|default:None }}</div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="rounded-lg shadow overflow-hidden bg-gradient-to-r from-indigo-600 to-indigo-500 text-white p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-xs uppercase tracking-wide opacity-90">Revenu total</div>
+          <div class="mt-2 text-2xl font-bold">{{ total_rev_all|intcomma }} FCFA</div>
+          <div class="text-xs opacity-80">Aujourd'hui {{ total_rev_today|intcomma }} · 7j {{ total_rev_7d|intcomma }} · 30j {{ total_rev_30d|intcomma }}</div>
+        </div>
+        <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
+      <div class="text-xs uppercase tracking-wide text-gray-500">Ventes</div>
+      <div class="mt-2 text-2xl font-bold text-gray-900">{{ count_all|intcomma }}</div>
+      <div class="text-xs text-gray-500">Aujourd'hui {{ count_today|intcomma }} · 7j {{ count_7d|intcomma }} · 30j {{ count_30d|intcomma }}</div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-400">
+      <div class="text-xs uppercase tracking-wide text-gray-500">Panier moyen</div>
+      <div class="mt-2 text-2xl font-bold text-gray-900">{{ avg_order_all|floatformat:0|intcomma }} FCFA</div>
+      <div class="text-xs text-gray-500">30j: {{ avg_order_30d|floatformat:0|intcomma }} FCFA</div>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded p-4">
+    <h3 class="text-lg font-semibold text-gray-800">Tendance — 30 derniers jours</h3>
+    <div class="chart-container mt-3" style="position:relative; height:260px; max-width:100%;">
+      <canvas id="chart-daily"></canvas>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold text-gray-800">Top produits (30j)</h3>
+      <ul class="mt-3 space-y-2">
+        {% for p in top_products %}
+        <li class="flex items-center justify-between">
+          <div class="flex-1">
+            <div class="text-sm font-medium text-gray-800">{{ p.product_name }}</div>
+            <div class="text-xs text-gray-500">Quantité: {{ p.total_qty|intcomma }}</div>
+          </div>
+          <div class="text-sm font-semibold text-indigo-600">{{ p.total_revenue|intcomma }} FCFA</div>
+        </li>
+        {% empty %}
+        <li class="text-sm text-gray-500">Aucun produit</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold text-gray-800">Top vendeurs (30j)</h3>
+      <ul class="mt-3 space-y-2">
+        {% for c in top_cashiers %}
+        <li class="flex items-center justify-between">
+          <div class="text-sm text-gray-800">{{ c.cashier__username }}</div>
+          <div class="text-sm font-semibold text-indigo-600">{{ c.total|intcomma }} FCFA</div>
+        </li>
+        {% empty %}
+        <li class="text-sm text-gray-500">Aucun</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h3 class="text-lg font-semibold text-gray-800">Répartition des moyens de paiement (30j)</h3>
+    <div class="mt-3 flex flex-wrap gap-2">
+      {% for pm in payments %}
+      <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm">{{ pm.payment_method }} — {{ pm.total|intcomma }} FCFA</span>
+      {% empty %}
+      <div class="text-sm text-gray-500">Aucune donnée</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h3 class="text-lg font-semibold text-gray-800">Produits en faible stock</h3>
+    <div class="mt-3 overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left text-xs text-gray-500">Produit</th><th class="px-4 py-2 text-right text-xs text-gray-500">Quantité</th><th class="px-4 py-2 text-right text-xs text-gray-500">Seuil</th></tr></thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for prod in low_stock %}
+          <tr>
+            <td class="px-4 py-2 text-sm text-gray-800">{{ prod.name }}</td>
+            <td class="px-4 py-2 text-sm text-right">
+              <span class="px-2 py-1 rounded text-sm font-medium {% if prod.quantity <= 0 %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">{{ prod.quantity }}</span>
+            </td>
+            <td class="px-4 py-2 text-sm text-right">{{ prod.alert_threshold }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="px-4 py-6 text-center text-sm text-gray-500">Aucun</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h3 class="text-lg font-semibold text-gray-800">Historique horaire (7j)</h3>
+    <div class="mt-3 overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left text-xs text-gray-500">Date/Heure</th><th class="px-4 py-2 text-right text-xs text-gray-500">Total</th><th class="px-4 py-2 text-right text-xs text-gray-500">Ventes</th></tr></thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for h in hourly %}
+          <tr><td class="px-4 py-2 text-sm text-gray-800">{{ h.hour|date:"d/m H:i" }}</td><td class="px-4 py-2 text-sm text-right">{{ h.total|intcomma }}</td><td class="px-4 py-2 text-sm text-right">{{ h.count }}</td></tr>
+          {% empty %}
+          <tr><td colspan="3" class="px-4 py-6 text-center text-sm text-gray-500">Aucune donnée</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('chart-daily').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{ dates|safe }},
+    datasets: [{
+      label: 'Revenu',
+      data: {{ totals|safe }},
+      borderColor: '#4f46e5',
+      backgroundColor: 'rgba(79,70,229,0.12)',
+      tension: 0.35,
+      pointRadius: 2,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { precision: 0 }
+      }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+{% endblock %}
+
+{% endblock %}

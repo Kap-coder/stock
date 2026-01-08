@@ -10,13 +10,17 @@
             <p class="text-gray-500">Remplissez les informations ci-dessous.</p>
         </div>
 
+        {% if product %}
+        <form method="POST" action="{% url 'product_edit' product.id %}" class="space-y-6">
+        {% else %}
         <form method="POST" action="{% url 'product_add' %}" class="space-y-6">
+        {% endif %}
             {% csrf_token %}
 
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">Nom du produit</label>
                 <div class="mt-1">
-                    <input type="text" name="name" id="name" required
+                    <input type="text" name="name" id="name" required value="{{ product.name|default:'' }}"
                         class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
                 </div>
             </div>
@@ -36,7 +40,7 @@
                         class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md p-2 border {% if not user.shop.is_pro %}bg-gray-100 cursor-not-allowed{% endif %}">
                         <option value="">-- Aucune catégorie --</option>
                         {% for cat in categories %}
-                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        <option value="{{ cat.id }}" {% if product and product.category and product.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -46,7 +50,7 @@
                 <div>
                     <label for="purchase_price" class="block text-sm font-medium text-gray-700">Prix d'achat</label>
                     <div class="mt-1 relative rounded-md shadow-sm">
-                        <input type="number" name="purchase_price" id="purchase_price" required min="0" step="0.01"
+                        <input type="number" name="purchase_price" id="purchase_price" required min="0" step="0.01" value="{{ product.purchase_price|default:0 }}"
                             class="focus:ring-primary focus:border-primary block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md p-2 border">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <span class="text-gray-500 sm:text-sm">FCFA</span>
@@ -57,7 +61,7 @@
                 <div>
                     <label for="selling_price" class="block text-sm font-medium text-gray-700">Prix de vente</label>
                     <div class="mt-1 relative rounded-md shadow-sm">
-                        <input type="number" name="selling_price" id="selling_price" required min="0" step="0.01"
+                        <input type="number" name="selling_price" id="selling_price" required min="0" step="0.01" value="{{ product.selling_price|default:0 }}"
                             class="focus:ring-primary focus:border-primary block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md p-2 border">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <span class="text-gray-500 sm:text-sm">FCFA</span>
@@ -69,7 +73,7 @@
             <div>
                 <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité initiale</label>
                 <div class="mt-1">
-                    <input type="number" name="quantity" id="quantity" required min="0"
+                    <input type="number" name="quantity" id="quantity" required min="0" value="{{ product.quantity|default:0 }}"
                         class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
                 </div>
             </div>

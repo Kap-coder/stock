@@ -1,0 +1,26 @@
+/* Small global tweaks to improve mobile UX */
+:root{
+  --primary: #4F46E5;
+  --secondary: #10B981;
+}
+
+/* Make touch targets larger on mobile */
+button, .btn {
+  touch-action: manipulation;
+}
+
+/* Responsive table container */
+.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-responsive table{min-width:640px}
+
+/* Improve readability on small screens */
+.safe-area{padding-left:1rem;padding-right:1rem}
+
+/* make action buttons full width on small screens */
+.btn-mobile-full{width:100%}
+@media(min-width:768px){
+  .btn-mobile-full{width:auto}
+}
+
+/* subtle shadow for cards on mobile */
+.card-mobile{box-shadow:0 6px 18px rgba(15,23,42,0.06)}

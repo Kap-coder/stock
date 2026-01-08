@@ -49,3 +49,26 @@ class Invoice(models.Model):
     number = models.CharField(max_length=50, unique=True)
     pdf_file = models.FileField(upload_to='invoices/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ActionLog(models.Model):
+    class ActionChoices(models.TextChoices):
+        SALE_CREATED = 'SALE_CREATED', 'Sale created'
+        SALE_DELETED = 'SALE_DELETED', 'Sale deleted'
+        INVOICE_PDF_GENERATED = 'INVOICE_PDF_GENERATED', 'Invoice PDF generated'
+        ITEM_ADDED = 'ITEM_ADDED', 'Item added'
+        ITEM_UPDATED = 'ITEM_UPDATED', 'Item updated'
+
+    shop = models.ForeignKey('core.Shop', on_delete=models.CASCADE, related_name='action_logs')
+    user = models.ForeignKey('core.User', on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=50, choices=ActionChoices.choices)
+    object_type = models.CharField(max_length=100, blank=True, null=True)
+    object_id = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.created_at}] {self.get_action_display()} ({self.object_type}#{self.object_id})"

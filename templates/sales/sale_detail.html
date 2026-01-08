@@ -71,11 +71,21 @@
 
         <!-- Footer Actions -->
         {% if user.shop.has_professional_invoice and invoice.pdf_file %}
-        <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end items-center space-x-4">
+            <a href="{% url 'sale_receipt' invoice.id %}" target="_blank" class="flex items-center text-indigo-600 hover:text-indigo-900 font-medium text-sm mr-4">
+                <i class="fas fa-receipt mr-2"></i> Voir reçu
+            </a>
             <a href="{{ invoice.pdf_file.url }}" target="_blank"
                 class="flex items-center text-indigo-600 hover:text-indigo-900 font-medium text-sm">
                 <i class="fas fa-file-pdf mr-2"></i> Télécharger la facture PDF
             </a>
+            {% comment %} Show delete button only to shop owner or shop admin {% endcomment %}
+            {% if user == sale.shop.owner or user.shop == sale.shop and user.role == 'ADMIN' %}
+            <form method="post" action="{% url 'sale_delete' invoice.id %}">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-2 bg-red-600 text-white rounded text-sm" onclick="return confirm('Supprimer cette vente ?');">Supprimer</button>
+            </form>
+            {% endif %}
         </div>
         {% endif %}
     </div>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hors-ligne - G-Business</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;padding:2rem;background:#f8fafc;color:#0f172a}</style>
+</head>
+<body>
+  <div style="max-width:720px;margin:3rem auto;text-align:left;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06)">
+    <h1 style="font-size:1.5rem;margin-bottom:0.5rem;text-align:center">Vous êtes hors-ligne</h1>
+    <p style="color:#475569;text-align:center">Certaines fonctionnalités nécessitent une connexion Internet. Voici ce qui reste disponible :</p>
+
+    <ul style="margin-top:1rem;line-height:1.6;color:#0f172a">
+      <li>• Consultation des pages et vues déjà visitées (dashboard, produits, factures) si mises en cache.</li>
+      <li>• Utilisation du POS : les ventes sont enregistrées localement et mises en file (synchronisation automatique au retour en ligne).</li>
+      <li>• Création de clients/produits dans l'interface (si formulaires ont été visités) — ces actions seront synchronisées plus tard.</li>
+      <li>• Accès aux fichiers statiques précachés (styles, scripts, icônes) pour une expérience près du mode connecté.</li>
+      <li>• Installation de l'application (bouton d'installation disponible) pour une expérience hors-ligne améliorée.</li>
+    </ul>
+
+    <p style="margin-top:1rem;color:#475569">Limites : certaines actions en temps réel (consultation de données non mises en cache, appels API en écriture immédiate) nécessitent la connexion. Les opérations hors-ligne seront envoyées au serveur dès que la connexion revient.</p>
+
+    <div style="margin-top:1.25rem;text-align:center">
+      <a href="/" class="px-4 py-2 bg-primary text-white rounded-md">Retour à l'accueil</a>
+    </div>
+  </div>
+</body>
+</html>

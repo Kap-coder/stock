@@ -1,0 +1,66 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Historique des actions{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <div class="flex justify-between items-center">
+    <h2 class="text-2xl font-bold">Historique des actions</h2>
+  </div>
+
+  <div class="bg-white shadow sm:rounded-lg overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Utilisateur</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Objet</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for log in logs %}
+        <tr>
+          <td class="px-4 py-2 text-sm text-gray-600">{{ log.created_at|date:"d/m/Y H:i" }}</td>
+          <td class="px-4 py-2 text-sm text-gray-800">{% if log.user %}{{ log.user.username }}{% else %}Système{% endif %}</td>
+          <td class="px-4 py-2 text-sm text-gray-800">{{ log.get_action_display }}</td>
+          <td class="px-4 py-2 text-sm text-gray-800">{{ log.object_type }} #{{ log.object_id }}</td>
+          <td class="px-4 py-2 text-sm text-gray-600">{{ log.description }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500">Aucune action enregistrée.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if logs.paginator.num_pages > 1 %}
+  <div class="flex justify-center">
+    <nav class="inline-flex -space-x-px" aria-label="Pagination">
+      {% if logs.has_previous %}
+      <a href="?page={{ logs.previous_page_number }}" class="px-3 py-1 bg-white border">Préc</a>
+      {% else %}
+      <span class="px-3 py-1 bg-gray-100 border text-gray-400">Préc</span>
+      {% endif %}
+
+      {% for p in logs.paginator.page_range %}
+        {% if p == logs.number %}
+        <span class="px-3 py-1 bg-indigo-600 text-white border">{{ p }}</span>
+        {% else %}
+        <a href="?page={{ p }}" class="px-3 py-1 bg-white border">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if logs.has_next %}
+      <a href="?page={{ logs.next_page_number }}" class="px-3 py-1 bg-white border">Suiv</a>
+      {% else %}
+      <span class="px-3 py-1 bg-gray-100 border text-gray-400">Suiv</span>
+      {% endif %}
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

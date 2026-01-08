@@ -171,19 +171,47 @@
     // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
     deferredPrompt = e;
-
-    // Only show if not already installed and not dismissed recently
+    // If app not installed, show modal (we want it every load until installed)
     const installed = localStorage.getItem('pwa_installed');
-    const dismissed = localStorage.getItem('pwa_install_dismissed');
-    if (installed) return;
-    if (dismissed) {
-      const ts = parseInt(dismissed, 10);
-      // don't show again for 24 hours
-      if (Date.now() - ts < 24 * 3600 * 1000) return;
+    if (!installed) {
+      showInstallModal();
     }
-
-    showInstallModal();
+    updateInstallButton();
   });
+
+  // Update install button enabled state
+  function updateInstallButton(){
+    const btn = document.getElementById('pwa-install-btn');
+    if (!btn) return;
+    if (deferredPrompt) {
+      btn.removeAttribute('disabled');
+      btn.classList.remove('opacity-50','cursor-not-allowed');
+      btn.textContent = 'Installer';
+    } else {
+      // Prompt not available yet; keep button visible but disabled and show helper text
+      btn.setAttribute('disabled','true');
+      btn.classList.add('opacity-50','cursor-not-allowed');
+      btn.textContent = 'Installer (non disponible)';
+    }
+  }
+
+  // Update floating install button visibility
+  function updateFloatingButton(){
+    const f = document.getElementById('pwa-floating-install');
+    if (!f) return;
+    if (isAppInstalled()) {
+      f.classList.add('hidden');
+      return;
+    }
+    // show floating button only once per session (per application session/tab)
+    // store flag in sessionStorage so it won't reappear during same tab session
+    if (sessionStorage.getItem('pwa_floating_shown')) {
+      f.classList.add('hidden');
+      return;
+    }
+    f.classList.remove('hidden');
+    try { sessionStorage.setItem('pwa_floating_shown', '1'); } catch(e) {}
+  }
 
   // Wire modal buttons
   document.addEventListener('click', async (ev) => {
@@ -191,21 +219,42 @@
     if (!t) return;
 
     if (t.id === 'pwa-install-btn'){
-      if (!deferredPrompt) return;
+      if (!deferredPrompt) {
+        showToast('L’installation n’est pas disponible pour votre navigateur.', 'error');
+        return;
+      }
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice && choice.outcome === 'accepted'){
         localStorage.setItem('pwa_installed', '1');
-      } else {
-        localStorage.setItem('pwa_install_dismissed', Date.now().toString());
       }
       hideInstallModal();
       deferredPrompt = null;
+      updateInstallButton();
+      updateFloatingButton();
     }
 
     if (t.id === 'pwa-install-dismiss' || t.id === 'pwa-install-close'){
-      localStorage.setItem('pwa_install_dismissed', Date.now().toString());
+      // Do not persist dismissal: show modal again on next load until installed
       hideInstallModal();
+    }
+
+    // Floating install button click
+    if (t.id === 'pwa-floating-install'){
+      const f = document.getElementById('pwa-floating-install');
+      if (!deferredPrompt) {
+        showToast('L’installation n’est pas disponible pour votre navigateur.', 'error');
+        return;
+      }
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted'){
+        localStorage.setItem('pwa_installed', '1');
+      }
+      // hide floating button after attempt
+      if (f) f.classList.add('hidden');
+      deferredPrompt = null;
+      updateInstallButton();
     }
   });
 
@@ -213,6 +262,23 @@
   window.addEventListener('appinstalled', (evt) => {
     localStorage.setItem('pwa_installed', '1');
     hideInstallModal();
+    const f = document.getElementById('pwa-floating-install'); if (f) f.classList.add('hidden');
   });
+
+  // On initial load: if not installed, always show install modal (per request)
+  function isAppInstalled(){
+    try{
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+      if (navigator.standalone) return true; // iOS
+    } catch(e){}
+    return !!localStorage.getItem('pwa_installed');
+  }
+
+  // Show modal on each visit if app not installed
+  if (!isAppInstalled()){
+    showInstallModal();
+    updateInstallButton();
+    updateFloatingButton();
+  }
 
 })();

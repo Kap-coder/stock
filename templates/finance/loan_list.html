@@ -37,11 +37,11 @@
         </div>
 
         <!-- Loans Table -->
-        <div x-show="tab === 'loans'" class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div x-show="tab === 'loans'" class="bg-white shadow overflow-hidden sm:rounded-lg table-responsive">
             <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Liste des Créances</h3>
                 <a href="{% url 'loan_add' %}?type=LOAN"
-                    class="px-3 py-1 bg-primary text-white text-sm rounded shadow hover:bg-indigo-700">+ Nouveau
+                    class="px-3 py-1 bg-primary text-white text-sm rounded shadow hover:bg-indigo-700 btn-mobile-full">+ Nouveau
                     Prêt</a>
             </div>
             <table class="min-w-full divide-y divide-gray-200">
@@ -71,11 +71,11 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
                             {% if loan.status != 'PAID' %}
-                            <form action="{% url 'loan_repay' loan.id %}" method="POST" class="flex gap-2">
+                            <form action="{% url 'loan_repay' loan.id %}" method="POST" class="flex flex-col sm:flex-row gap-2">
                                 {% csrf_token %}
-                                <input type="number" name="amount" class="w-20 text-xs border rounded"
+                                <input type="number" name="amount" class="w-full sm:w-20 text-xs border rounded p-1"
                                     placeholder="Montant">
-                                <button type="submit" class="text-green-600 font-bold text-xs">Encaisser</button>
+                                <button type="submit" class="w-full sm:w-auto btn-mobile-full text-green-600 font-bold text-xs py-1">Encaisser</button>
                             </form>
                             {% endif %}
                         </td>
@@ -90,11 +90,11 @@
         </div>
 
         <!-- Debts Table -->
-        <div x-show="tab === 'debts'" class="bg-white shadow overflow-hidden sm:rounded-lg" style="display: none;">
+        <div x-show="tab === 'debts'" class="bg-white shadow overflow-hidden sm:rounded-lg table-responsive" style="display: none;">
             <div class="px-4 py-5 sm:px-6 flex justify-between items-center bg-red-50">
                 <h3 class="text-lg leading-6 font-medium text-red-900">Liste des Dettes (À Payer)</h3>
                 <a href="{% url 'loan_add' %}?type=DEBT"
-                    class="px-3 py-1 bg-red-600 text-white text-sm rounded shadow hover:bg-red-700">+ Nouvelle Dette</a>
+                    class="px-3 py-1 bg-red-600 text-white text-sm rounded shadow hover:bg-red-700 btn-mobile-full">+ Nouvelle Dette</a>
             </div>
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -123,11 +123,11 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
                             {% if debt.status != 'PAID' %}
-                            <form action="{% url 'loan_repay' debt.id %}" method="POST" class="flex gap-2">
+                            <form action="{% url 'loan_repay' debt.id %}" method="POST" class="flex flex-col sm:flex-row gap-2">
                                 {% csrf_token %}
-                                <input type="number" name="amount" class="w-20 text-xs border rounded"
+                                <input type="number" name="amount" class="w-full sm:w-20 text-xs border rounded p-1"
                                     placeholder="Montant">
-                                <button type="submit" class="text-red-600 font-bold text-xs">Rembourser</button>
+                                <button type="submit" class="w-full sm:w-auto btn-mobile-full text-red-600 font-bold text-xs py-1">Rembourser</button>
                             </form>
                             {% endif %}
                         </td>

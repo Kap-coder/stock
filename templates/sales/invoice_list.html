@@ -1,96 +1,156 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Factures - ShopManager{% endblock %}
+{% block title %}Factures — {{ request.user.shop.name }}{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <h2 class="text-2xl font-bold text-gray-800">Historique des Ventes</h2>
-        <form method="GET" class="flex flex-wrap gap-2 items-end">
-            <div>
-                <label class="block text-xs text-gray-500">Du</label>
-                <input type="date" name="start_date" value="{{ request.GET.start_date }}"
-                    class="text-sm border-gray-300 rounded focus:ring-primary focus:border-primary p-1">
-            </div>
-            <div>
-                <label class="block text-xs text-gray-500">Au</label>
-                <input type="date" name="end_date" value="{{ request.GET.end_date }}"
-                    class="text-sm border-gray-300 rounded focus:ring-primary focus:border-primary p-1">
-            </div>
-            <button type="submit"
-                class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm text-gray-700">Filtrer</button>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Historique des ventes</h2>
+            <p class="text-sm text-gray-500">Toutes les factures de la boutique</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <form method="GET" class="flex items-center gap-2">
+                <label class="text-xs text-gray-500">Du</label>
+                <input type="date" name="start_date" value="{{ request.GET.start_date }}" class="text-sm border-gray-300 rounded p-1">
+                <label class="text-xs text-gray-500">Au</label>
+                <input type="date" name="end_date" value="{{ request.GET.end_date }}" class="text-sm border-gray-300 rounded p-1">
+                <button type="submit" class="ml-2 px-3 py-1 bg-indigo-600 text-white rounded">Filtrer</button>
+            </form>
             {% if request.GET.start_date or request.GET.end_date %}
-            <a href="{% url 'invoice_list' %}" class="text-xs text-red-500 underline ml-1">X</a>
+            <a href="{% url 'invoice_list' %}" class="text-sm text-red-500 underline">Effacer</a>
             {% endif %}
-        </form>
+        </div>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <!-- Summary bar -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white shadow rounded-lg p-4">
+            <div class="text-xs text-gray-500">Total période</div>
+            <div class="mt-2 text-lg font-semibold text-gray-900">{{ total_sales }} FCFA</div>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <div class="text-xs text-gray-500">Factures</div>
+            <div class="mt-2 text-lg font-semibold text-gray-900">{{ invoices.paginator.count }}</div>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-gray-500">Actions rapides</div>
+                <div class="mt-2 text-sm">
+                    <a href="{% url 'action_log' %}" class="text-indigo-600 hover:underline">Historique</a>
+                </div>
+            </div>
+            <div class="text-indigo-600 text-2xl">📄</div>
+        </div>
+    </div>
+
+    <!-- Mobile: cards -->
+    <div class="space-y-3 sm:hidden">
+        {% for invoice in invoices %}
+        <div class="bg-white shadow rounded-lg p-3">
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="text-sm font-medium text-gray-800">#{{ invoice.number }}</div>
+                    <div class="text-xs text-gray-500">{{ invoice.created_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-semibold text-gray-900">{{ invoice.sale.total_amount }} FCFA</div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <a href="{% url 'sale_detail' invoice.id %}" class="text-indigo-600 text-sm">Détails</a>
+                        {% if user.shop.has_professional_invoice and invoice.pdf_file %}
+                        <a href="{{ invoice.pdf_file.url }}" class="text-indigo-600 text-sm" target="_blank">PDF</a>
+                        {% endif %}
+                        {% if user == invoice.sale.shop.owner or user.shop == invoice.sale.shop and user.role == 'ADMIN' %}
+                        <form method="post" action="{% url 'sale_delete' invoice.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-600 text-sm" onclick="return confirm('Supprimer cette vente ?');">Suppr</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-sm text-gray-500">Aucune vente enregistrée.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: table -->
+    <div class="hidden sm:block bg-white shadow rounded-lg overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N°
-                        Facture</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
-                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facture</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for invoice in invoices %}
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ invoice.number }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ invoice.created_at|date:"d/m/Y H:i"}}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ invoice.sale.total_amount}} FCFA</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div class="flex items-center space-x-3">
-                            <a href="{% url 'sale_detail' invoice.id %}" class="text-blue-600 hover:text-blue-900"
-                                title="Détails">
-                                <i class="fas fa-eye"></i>
-                            </a>
-
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ invoice.number }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ invoice.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">{{ invoice.sale.total_amount }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        <div class="inline-flex items-center space-x-3">
+                            <a href="{% url 'sale_detail' invoice.id %}" class="text-blue-600 hover:text-blue-900" title="Détails"><i class="fas fa-eye"></i></a>
                             {% if user.shop.has_professional_invoice %}
-                            {% if invoice.pdf_file %}
-                            <a href="{{ invoice.pdf_file.url }}" target="_blank"
-                                class="text-indigo-600 hover:text-indigo-900 flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                </svg>
-                                PDF
-                            </a>
+                                {% if invoice.pdf_file %}
+                                <a href="{{ invoice.pdf_file.url }}" target="_blank" class="text-indigo-600 hover:text-indigo-900" title="PDF"><i class="fas fa-file-pdf"></i></a>
+                                {% else %}
+                                <span class="text-gray-400 text-xs">En cours...</span>
+                                {% endif %}
                             {% else %}
-                            <span class="text-gray-400 text-xs">En cours...</span>
+                                <span class="text-gray-400 text-xs" title="Plan Medium requis">🔒</span>
                             {% endif %}
-                            {% else %}
-                            <span class="text-gray-400 text-xs cursor-not-allowed" title="Plan Medium requis">🔒
-                                PDF</span>
+
+                            {% if user == invoice.sale.shop.owner or user.shop == invoice.sale.shop and user.role == 'ADMIN' %}
+                            <form method="post" action="{% url 'sale_delete' invoice.id %}" class="inline-block">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:text-red-900" title="Supprimer" onclick="return confirm('Supprimer cette vente ?');"><i class="fas fa-trash"></i></button>
+                            </form>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Aucune vente
-                        enregistrée.</td>
+                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Aucune vente enregistrée.</td>
                 </tr>
                 {% endfor %}
             </tbody>
-            <tfoot class="bg-gray-50 border-t border-gray-200">
-                <tr>
-                    <td colspan="2" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Total Période :</td>
-                    <td class="px-6 py-3 text-sm font-bold text-gray-900">{{ total_sales }} FCFA</td>
-                    <td></td>
-                </tr>
-            </tfoot>
         </table>
     </div>
+
+    <!-- Pagination -->
+    {% if invoices.paginator.num_pages > 1 %}
+    <div class="mt-4 flex justify-center">
+        <nav class="inline-flex -space-x-px" aria-label="Pagination">
+            {% if invoices.has_previous %}
+            <a href="?page={{ invoices.previous_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="px-3 py-1 bg-white border">Préc</a>
+            {% else %}
+            <span class="px-3 py-1 bg-gray-100 border text-gray-400">Préc</span>
+            {% endif %}
+
+            {% for p in invoices.paginator.page_range %}
+                {% if p == invoices.number %}
+                <span class="px-3 py-1 bg-indigo-600 text-white border">{{ p }}</span>
+                {% else %}
+                <a href="?page={{ p }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="px-3 py-1 bg-white border">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if invoices.has_next %}
+            <a href="?page={{ invoices.next_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="px-3 py-1 bg-white border">Suiv</a>
+            {% else %}
+            <span class="px-3 py-1 bg-gray-100 border text-gray-400">Suiv</span>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

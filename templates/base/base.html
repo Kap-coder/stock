@@ -6,13 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shop Manager{% endblock %}</title>
-    <!-- Tailwind CSS (CDN for dev) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Local vendor assets (download with scripts/download_vendors.py) -->
+    <script src="{% static 'vendor/tailwind.js' %}"></script>
     <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/all.css' %}">
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{% static 'vendor/htmx.min.js' %}"></script>
+    <script src="{% static 'js/all.js' %}"></script>
+    <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
 
     <script>
         tailwind.config = {
@@ -49,118 +50,137 @@
     <!-- PWA manifest -->
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#4F46E5">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Sidebar (Desktop) -->
-    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
+    <!-- Desktop Sidebar (visible on md+) -->
+    <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 z-10" aria-label="Sidebar">
         <div class="h-16 flex items-center justify-center border-b border-gray-200">
-            <h1
-                class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">
-                <i class="fas fa-store mr-2 text-primary"></i>G-Business
+            <h1 class="text-2xl font-extrabold text-primary">
+                <i class="fas fa-store mr-2"></i>G-Business
             </h1>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4">
-            <ul class="space-y-1 px-3">
+        <nav class="flex-1 overflow-y-auto py-4 px-2">
+            <ul class="space-y-1">
                 {% if user.is_authenticated %}
+                {% if user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'dashboard' %}"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200">
+                    <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <i class="fas fa-chart-line w-5 mr-3"></i> Tableau de bord
                     </a>
                 </li>
+                {% endif %}
+
+                {# POS: caissier, manager, admin #}
+                {% if user.role == 'CASHIER' or user.role == 'MANAGER' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'pos' %}"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200">
+                    <a href="{% url 'pos' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <i class="fas fa-cash-register w-5 mr-3"></i> Point de Vente
                     </a>
                 </li>
+                {% endif %}
+
+                {# Stock: manager, admin #}
+                {% if user.role == 'MANAGER' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'product_list' %}"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200">
+                    <a href="{% url 'product_list' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <i class="fas fa-box w-5 mr-3"></i> Stock
                     </a>
                 </li>
+                {% endif %}
+
+                {# Ventes: cashier, manager, accountant, admin #}
+                {% if user.role == 'CASHIER' or user.role == 'MANAGER' or user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'invoice_list' %}"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200">
+                    <a href="{% url 'invoice_list' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <i class="fas fa-file-invoice-dollar w-5 mr-3"></i> Ventes
                     </a>
                 </li>
-
-                <li class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
+                {% endif %}
+                <li class="pt-4 pb-2 px-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
                 </li>
-
+                {# Comptabilité: accountant, admin #}
+                {% if user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'accounting_dashboard' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'accounting_dashboard' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-calculator w-5 mr-3"></i> Comptabilité</div>
-                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs"
-                            title="Medium"></i>{% endif %}
+                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs" title="Medium"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
+
+                {# Statistiques: manager, accountant, admin #}
+                {% if user.role == 'MANAGER' or user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'statistics' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'statistics' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-chart-pie w-5 mr-3"></i> Statistiques</div>
-                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs"
-                            title="Medium"></i>{% endif %}
+                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs" title="Medium"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
+
+                {# Prêts: accountant, admin #}
+                {% if user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'loan_list' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'loan_list' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-hand-holding-usd w-5 mr-3"></i> Prêts</div>
-                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs"
-                            title="Medium"></i>{% endif %}
+                        {% if not user.shop.has_advanced_accounting %}<i class="fas fa-crown text-gray-400 text-xs" title="Medium"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
+
+                {# Impôts: accountant, admin #}
+                {% if user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'taxes_dashboard' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'taxes_dashboard' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-file-contract w-5 mr-3"></i> Impôts</div>
-                        {% if not user.shop.is_pro_plus %}<i class="fas fa-crown text-orange-500 text-xs"
-                            title="Pro+"></i>{% endif %}
+                        {% if not user.shop.is_pro_plus %}<i class="fas fa-crown text-orange-500 text-xs" title="Pro+"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
 
-                <li class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</p>
+                <li class="pt-4 pb-2 px-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</p>
                 </li>
-
+                {# Équipe: only admin #}
+                {% if user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'user_list' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'user_list' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-users w-5 mr-3"></i> Équipe</div>
                         {% if not user.shop.is_pro %}<i class="fas fa-crown text-yellow-500 text-xs" title="Pro"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
+
+                {# Catégories: manager, admin #}
+                {% if user.role == 'MANAGER' or user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'category_list' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'category_list' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-tags w-5 mr-3"></i> Catégories</div>
                         {% if not user.shop.is_pro %}<i class="fas fa-crown text-yellow-500 text-xs" title="Pro"></i>{% endif %}
                     </a>
                 </li>
+                {% endif %}
 
                 {% if user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'shop_list' %}"
-                        class="flex justify-between items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200 group">
+                    <a href="{% url 'shop_list' %}" class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <div class="flex items-center"><i class="fas fa-building w-5 mr-3"></i> Entreprises</div>
                         {% if not user.shop.is_pro %}<i class="fas fa-crown text-yellow-500 text-xs" title="Pro"></i>{% endif %}
                     </a>
                 </li>
                 {% endif %}
 
+                {% if user.role == 'ADMIN' %}
                 <li>
-                    <a href="{% url 'plans' %}"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary transition-colors duration-200">
+                    <a href="{% url 'plans' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-primary">
                         <i class="fas fa-rocket w-5 mr-3"></i> Offres
                     </a>
                 </li>
+                {% endif %}
 
                 {% else %}
                 <li><a href="{% url 'login' %}" class="block px-4 py-2 hover:bg-gray-100 rounded-md">Connexion</a></li>
@@ -181,22 +201,47 @@
             </div>
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit"
-                    class="w-full flex items-center justify-center px-4 py-2 border border-red-200 rounded-md text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
+                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-red-200 rounded-md text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
                     <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
                 </button>
             </form>
             {% endif %}
-            <div class="mt-4 text-center text-xs text-gray-400 font-medium">
-                Coded by <span class="text-primary">Kapcoder</span>
-            </div>
+            <div class="mt-4 text-center text-xs text-gray-400 font-medium">Coded by <span class="text-primary">Kapcoder</span></div>
         </div>
     </aside>
 
+    <!-- Fixed Top Header -->
+    <header class="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
+                    {% if user.is_authenticated and user.shop %}
+                        {{ user.shop.name|slice:":1"|upper }}
+                    {% else %}
+                        G
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">G-Business</div>
+                    <div class="text-base font-semibold text-gray-800">Gestion de Boutique</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if user.role == 'CASHIER' or user.role == 'MANAGER' or user.role == 'ADMIN' %}
+                <a href="{% url 'pos' %}" class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-md shadow-sm">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="text-sm font-medium">POS</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Mobile top bar & off-canvas removed (navigation is via bottom bar) -->
         <!-- Scrollable Content Area -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 pb-24 md:pb-4">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 pb-24 md:pb-4 safe-area pt-16" style="padding-bottom: env(safe-area-inset-bottom);">
             <!-- Added padding-bottom for mobile nav -->
             {% if messages %}
             <div class="mb-4 space-y-2">
@@ -208,8 +253,33 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% block content %}
-            {% endblock %}
+            <div class="max-w-4xl mx-auto w-full">
+                <!-- App header: app name, shop initial, POS shortcut (hidden — using fixed header) -->
+                <div class="hidden">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
+                            {% if user.is_authenticated and user.shop %}
+                                {{ user.shop.name|slice:":1"|upper }}
+                            {% else %}
+                                G
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">G-Business</div>
+                            <div class="text-base font-semibold text-gray-800">Gestion de Boutique</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'pos' %}" class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-md shadow-sm">
+                            <i class="fas fa-cash-register"></i>
+                            <span class="text-sm font-medium">POS</span>
+                        </a>
+                    </div>
+                </div>
+
+                {% block content %}
+                {% endblock %}
+            </div>
 
             <footer class="mt-8 text-center md:hidden pb-4">
                 <p class="text-xs text-gray-400">G-Business &copy; 2024 - Coded by <span
@@ -221,119 +291,62 @@
         <nav
             class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center h-16 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
 
+            {% if user.role == 'ADMIN' %}
             <a href="{% url 'dashboard' %}"
-                class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary transition-colors {% if request.resolver_match.url_name == 'dashboard' %}text-primary{% endif %}">
-                <i
-                    class="fas fa-home text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'dashboard' %}scale-110{% endif %}"></i>
+                class="flex flex-col items-center justify-center w-full h-full hover:text-primary transition-colors {% if request.resolver_match.url_name == 'dashboard' %}text-primary{% else %}text-gray-500{% endif %}"
+                {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+                <i class="fas fa-home text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'dashboard' %}scale-110{% endif %}"></i>
                 <span class="text-[10px] font-medium">Accueil</span>
             </a>
+            {% endif %}
 
-            <a href="{% url 'pos' %}"
-                class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary transition-colors {% if request.resolver_match.url_name == 'pos' %}text-primary{% endif %}">
-                <div
-                    class="bg-primary text-white p-3 rounded-full -mt-8 shadow-lg border-4 border-white transform transition-transform hover:scale-105">
+            {% if user.role == 'CASHIER' or user.role == 'MANAGER' or user.role == 'ADMIN' %}
+            <a href="{% url 'pos' %}" class="flex flex-col items-center justify-center w-full h-full hover:text-primary transition-colors {% if request.resolver_match.url_name == 'pos' %}text-primary{% else %}text-gray-500{% endif %}" {% if request.resolver_match.url_name == 'pos' %}aria-current="page"{% endif %}>
+                <div class="bg-primary text-white p-3 rounded-full -mt-8 shadow-lg border-4 border-white transform transition-transform hover:scale-105">
                     <i class="fas fa-cash-register text-xl"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">POS</span>
             </a>
+            {% endif %}
 
-            <a href="{% url 'product_list' %}"
-                class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary transition-colors {% if request.resolver_match.url_name == 'product_list' %}text-primary{% endif %}">
-                <i
-                    class="fas fa-box text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'product_list' %}scale-110{% endif %}"></i>
+            {% if user.role == 'MANAGER' or user.role == 'ADMIN' %}
+            <a href="{% url 'product_list' %}" class="flex flex-col items-center justify-center w-full h-full hover:text-primary transition-colors {% if request.resolver_match.url_name == 'product_list' %}text-primary{% else %}text-gray-500{% endif %}" {% if request.resolver_match.url_name == 'product_list' %}aria-current="page"{% endif %}>
+                <i class="fas fa-box text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'product_list' %}scale-110{% endif %}"></i>
                 <span class="text-[10px] font-medium">Stock</span>
             </a>
+            {% endif %}
 
-            <a href="{% url 'invoice_list' %}"
-                class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary transition-colors {% if request.resolver_match.url_name == 'invoice_list' %}text-primary{% endif %}">
-                <i
-                    class="fas fa-file-invoice-dollar text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'invoice_list' %}scale-110{% endif %}"></i>
+            {% if user.role == 'CASHIER' or user.role == 'MANAGER' or user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
+            <a href="{% url 'invoice_list' %}" class="flex flex-col items-center justify-center w-full h-full hover:text-primary transition-colors {% if request.resolver_match.url_name == 'invoice_list' %}text-primary{% else %}text-gray-500{% endif %}" {% if request.resolver_match.url_name == 'invoice_list' %}aria-current="page"{% endif %}>
+                <i class="fas fa-file-invoice-dollar text-lg mb-1 transform transition-transform {% if request.resolver_match.url_name == 'invoice_list' %}scale-110{% endif %}"></i>
                 <span class="text-[10px] font-medium">Ventes</span>
             </a>
+            {% endif %}
 
-            <!-- More Menu Trigger -->
+            <!-- More Menu Trigger: compact dropdown -->
             <div x-data="{ open: false }" class="relative w-full h-full flex flex-col items-center justify-center">
                 <button @click="open = !open"
                     class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary focus:outline-none transition-colors"
                     :class="{'text-primary': open}">
-                    <i class="fas fa-bars text-lg mb-1" :class="{'fa-times': open, 'fa-bars': !open}"></i>
-                    <span class="text-[10px] font-medium">Menu</span>
+                    <i class="fas fa-ellipsis-h text-lg mb-1"></i>
+                    <span class="text-[10px] font-medium">Plus</span>
                 </button>
 
-                <!-- Full Screen / Bottom Sheet Overlay for Menu -->
-                <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50 z-40"
-                    x-transition:enter="transition-opacity ease-linear duration-300"
-                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                    x-transition:leave="transition-opacity ease-linear duration-300"
-                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="open = false">
-                </div>
-
-                <div x-show="open"
-                    class="fixed bottom-16 left-0 w-full bg-white rounded-t-2xl shadow-2xl z-50 overflow-hidden max-h-[80vh] overflow-y-auto"
-                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full"
-                    x-transition:enter-end="translate-y-0" x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full">
-
-                    <div class="p-4 grid grid-cols-3 gap-4 text-center">
-                        <div class="col-span-3 border-b border-gray-100 pb-2 mb-2">
-                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide">Gestion</h3>
-                        </div>
-
-                        <a href="{% url 'accounting_dashboard' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-calculator text-2xl text-indigo-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Comptabilité</span>
-                        </a>
-                        <a href="{% url 'statistics' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-chart-pie text-2xl text-purple-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Stats</span>
-                        </a>
-                        <a href="{% url 'loan_list' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-hand-holding-usd text-2xl text-green-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Prêts</span>
-                        </a>
-                        <a href="{% url 'taxes_dashboard' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-file-contract text-2xl text-orange-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Impôts</span>
-                        </a>
-                        <a href="{% url 'category_list' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-tags text-2xl text-pink-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Catégories</span>
-                        </a>
-                        <a href="{% url 'user_list' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-users text-2xl text-blue-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Équipe</span>
-                        </a>
-
-                        {% if user.role == 'ADMIN' %}
-                        <div class="col-span-3 border-b border-gray-100 pb-2 mb-2 mt-2">
-                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide">Admin</h3>
-                        </div>
-                        <a href="{% url 'shop_list' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-building text-2xl text-gray-700 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Entreprises</span>
-                        </a>
-                        <a href="{% url 'plans' %}"
-                            class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition">
-                            <i class="fas fa-rocket text-2xl text-red-500 mb-2"></i>
-                            <span class="text-xs font-medium text-gray-700">Plans</span>
-                        </a>
-                        {% endif %}
-                    </div>
-
-                    <div class="bg-gray-50 p-4 border-t border-gray-200">
+                <div x-show="open" x-transition class="absolute bottom-20 right-4 bg-white rounded-lg shadow-lg z-50 w-44 p-2">
+                    {% if user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
+                    <a href="{% url 'accounting_dashboard' %}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"><i class="fas fa-calculator w-4"></i> Comptabilité</a>
+                    {% endif %}
+                    {% if user.role == 'MANAGER' or user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
+                    <a href="{% url 'statistics' %}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"><i class="fas fa-chart-pie w-4"></i> Stats</a>
+                    {% endif %}
+                    {% if user.role == 'ACCOUNTANT' or user.role == 'ADMIN' %}
+                    <a href="{% url 'loan_list' %}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"><i class="fas fa-hand-holding-usd w-4"></i> Prêts</a>
+                    <a href="{% url 'taxes_dashboard' %}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"><i class="fas fa-file-contract w-4"></i> Impôts</a>
+                    {% endif %}
+                    <div class="border-t border-gray-100 mt-2 pt-2">
                         <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
-                            <button type="submit"
-                                class="w-full flex items-center justify-center px-4 py-3 bg-red-100 text-red-600 rounded-lg font-bold hover:bg-red-200 transition">
-                                <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
-                            </button>
+                            <button type="submit" class="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded"><i class="fas fa-sign-out-alt w-4"></i> Déconnexion</button>
                         </form>
                     </div>
                 </div>
@@ -344,6 +357,12 @@
         <!-- PWA registration -->
         <script src="{% static 'js/pwa.js' %}"></script>
         <!-- Install Modal -->
+        <!-- Floating Install Button (shows until app installed) -->
+        <button id="pwa-floating-install" aria-label="Installer l'application"
+            class="hidden fixed z-50 right-4 bottom-20 md:bottom-6 bg-primary text-white p-3 rounded-full shadow-lg">
+            <i class="fas fa-download"></i>
+        </button>
+
         <div id="pwa-install-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-40">
             <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6">
                 <div class="flex items-center justify-between">
@@ -357,6 +376,7 @@
                 </div>
             </div>
         </div>
+        <!-- mobile menu script removed (navigation handled by bottom bar) -->
     </body>
 
 </html>

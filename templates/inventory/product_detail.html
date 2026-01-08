@@ -1,0 +1,37 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Détails Produit - ShopManager{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">{{ product.name }}</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <p class="text-sm text-gray-500">Prix d'achat</p>
+        <p class="text-lg font-semibold">{{ product.purchase_price }} FCFA</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Prix de vente</p>
+        <p class="text-lg font-semibold">{{ product.selling_price }} FCFA</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Quantité</p>
+        <p class="text-lg font-semibold">{{ product.quantity }}</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Catégorie</p>
+        <p class="text-lg font-semibold">{% if product.category %}{{ product.category.name }}{% else %}-{% endif %}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-3">
+      <a href="{% url 'product_edit' product.id %}" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Modifier</a>
+      <form action="{% url 'product_delete' product.id %}" method="POST" onsubmit="return confirm('Supprimer ce produit ?');">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

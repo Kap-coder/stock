@@ -8,8 +8,7 @@
 <div class="h-full overflow-y-auto pb-24 md:pb-6"> <!-- Added scroll and padding for mobile nav -->
     <div class="max-w-2xl mx-auto space-y-6">
         <div class="flex justify-between items-center">
-            <h2
-                class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">
+            <h2 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                 {% if target_user %}Modifier Employé{% else %}Ajouter un Employé{% endif %}
             </h2>
             <a href="{% url 'user_list' %}"
@@ -21,8 +20,8 @@
         {% if messages %}
         <div class="space-y-2">
             {% for message in messages %}
-            <div class="p-4 rounded-md bg-red-50 border-l-4 border-red-500 text-red-700 shadow-sm flex items-center">
-                <i class="fas fa-exclamation-circle mr-3"></i>
+            <div class="p-4 rounded-md bg-bg-soft border-l-4 {% if message.tags == 'success' %}border-secondary text-secondary{% else %}border-red-500 text-red-700{% endif %} shadow-sm flex items-center">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} mr-3"></i>
                 {{ message }}
             </div>
             {% endfor %}
@@ -88,8 +87,8 @@
                             </option>
                         </select>
                     </div>
-                    <div class="mt-3 bg-blue-50 p-3 rounded-md border border-blue-100">
-                        <p class="text-xs text-blue-800 leading-relaxed">
+                    <div class="mt-3 bg-secondary/10 p-3 rounded-md border border-secondary/20">
+                        <p class="text-xs text-secondary leading-relaxed">
                             <i class="fas fa-info-circle mr-1"></i> <strong>Permissions :</strong><br>
                             • <strong>Caissier :</strong> POS uniquement.<br>
                             • <strong>Manager :</strong> Gestion Stock & POS.<br>
@@ -111,14 +110,13 @@
                     </div>
                     {% if target_user %}
                     <p class="text-xs text-gray-500 mt-2 flex items-center">
-                        <i class="fas fa- info-circle mr-1"></i> Laisser vide pour conserver le mot de passe actuel.
+                        <i class="fas fa-info-circle mr-1"></i> Laisser vide pour conserver le mot de passe actuel.
                     </p>
                     {% endif %}
                 </div>
 
                 <div class="flex justify-end pt-6">
-                    <button type="submit"
-                        class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-md shadow-lg hover:shadow-xl hover:from-indigo-600 hover:to-primary font-bold transition-all duration-200 transform hover:-translate-y-0.5">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-md shadow-lg hover:shadow-xl font-bold transition-all duration-200 transform hover:-translate-y-0.5">
                         <i class="fas fa-save mr-2"></i> Enregistrer
                     </button>
                 </div>

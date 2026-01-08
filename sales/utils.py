@@ -1,46 +1,43 @@
-from reportlab.pdfgen import canvas
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 import os
 from django.conf import settings
+from django.utils import timezone
+from .models import ActionLog
+
 
 def generate_invoice_pdf(invoice):
+    """Render invoice to PDF using HTML template (xhtml2pdf) and save to media/invoices."""
+    template = get_template('sales/invoice_pdf.html')
+    context = {
+        'invoice': invoice,
+        'sale': invoice.sale,
+        'items': invoice.sale.items.all(),
+        'shop': invoice.sale.shop,
+    }
+
+    html = template.render(context)
+
     filename = f"invoice_{invoice.number}.pdf"
     directory = os.path.join(settings.MEDIA_ROOT, 'invoices')
     os.makedirs(directory, exist_ok=True)
     full_path = os.path.join(directory, filename)
 
-    c = canvas.Canvas(full_path)
-    
-    # Header
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(50, 800, f"FACTURE #{invoice.number}")
-    
-    c.setFont("Helvetica", 12)
-    c.drawString(50, 780, f"Boutique: {invoice.sale.shop.name}")
-    c.drawString(50, 760, f"Date: {invoice.sale.created_at.strftime('%d/%m/%Y %H:%M')}")
-    
-    # Items
-    y = 720
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, "Produit")
-    c.drawString(300, y, "Qté")
-    c.drawString(350, y, "Prix")
-    c.drawString(450, y, "Total")
-    
-    y -= 20
-    c.setFont("Helvetica", 12)
-    
-    for item in invoice.sale.items.all():
-        c.drawString(50, y, item.product_name[:30])
-        c.drawString(300, y, str(item.quantity))
-        c.drawString(350, y, str(item.price))
-        c.drawString(450, y, str(item.subtotal))
-        y -= 20
-        
-    # Total
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(350, y-30, "TOTAL:")
-    c.drawString(450, y-30, str(invoice.sale.total_amount))
-    
-    c.save()
-    
-    return f"invoices/{filename}"
+    with open(full_path, 'wb') as f:
+        pisa_status = pisa.CreatePDF(html, dest=f)
+        if pisa_status.err:
+            raise Exception('Error creating PDF')
+    # log action
+    try:
+        ActionLog.objects.create(
+            shop=invoice.sale.shop,
+            user=getattr(invoice.sale, 'cashier', None),
+            action=ActionLog.ActionChoices.INVOICE_PDF_GENERATED,
+            object_type='Invoice',
+            object_id=str(invoice.id),
+            description=f'PDF generated: {filename}',
+        )
+    except Exception:
+        pass
+
+    return f'invoices/{filename}'

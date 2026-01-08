@@ -1,0 +1,26 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Confirmer suppression vente #{{ invoice.number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-xl font-bold mb-4">Supprimer la vente #{{ invoice.number }}</h2>
+    <p class="text-sm text-gray-600 mb-4">Vous êtes sur le point de supprimer définitivement cette vente et toutes ses lignes.</p>
+
+    <div class="mb-4">
+      <p><strong>Date:</strong> {{ sale.created_at|date:"d F Y à H:i" }}</p>
+      <p><strong>Total:</strong> {{ sale.total_amount }} FCFA</p>
+      <p class="text-sm text-gray-500">Vendu par: {{ sale.cashier.username }}</p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex justify-between">
+        <a href="{% url 'sale_detail' invoice.id %}" class="px-4 py-2 bg-gray-100 rounded">Annuler</a>
+        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded">Supprimer définitivement</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

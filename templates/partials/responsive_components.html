@@ -1,0 +1,13 @@
+{# Reusable responsive components and helpers #}
+{# Usage: include this partial in templates and use the macros/classes provided #}
+
+{# Responsive table wrapper #}
+{% macro table_wrapper %}
+<div class="table-responsive bg-white shadow sm:rounded-lg">
+    <!-- table goes inside -->
+</div>
+{% endmacro %}
+
+{# Form row helper - use classes directly: .form-row (.flex .flex-col md:flex-row gap-3) #}
+
+{# Card class: use .card-mobile on mobile for subtle shadow #}

@@ -6,19 +6,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} G-Business {% endblock %}</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
-     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local vendor assets (download with scripts/download_vendors.py) -->
+    <script src="{% static 'vendor/tailwind.js' %}"></script>
+    <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/all.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="{% static 'js/all.js' %}"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#4F46E5', // Indigo 600
-                        secondary: '#10B981', // Emerald 500
-                        dark: '#1F2937', // Gray 900
+                        primary: {
+                            DEFAULT: '#4F46E5', // Indigo 600
+                            600: '#6366F1',
+                            700: '#4F46E5'
+                        },
+                        secondary: {
+                            DEFAULT: '#10B981', // Emerald 500
+                            400: '#34D399'
+                        },
+                        accent: '#F59E0B', // Amber 500
+                        muted: '#6B7280', // Gray 500
+                        dark: '#0F172A', // Gray 900
+                        'bg-soft': '#F8FAFC'
                     }
                 }
             }
@@ -28,30 +39,28 @@
 
 <body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
     <!-- Public Header -->
-    <header class="bg-white shadow-sm z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{% url 'login' %}" class="flex-shrink-0 flex items-center">
-                        <h1
-                            class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">
-                            <i class="fas fa-store mr-2 text-primary"></i>G-Business
-                        </h1>
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'plans' %}"
-                        class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Tarifs</a>
-                    <a href="{% url 'about' %}"
-                        class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">À Propos</a>
-                    <a href="{% url 'login' %}"
-                        class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition">Connexion</a>
-                </div>
+    <header class="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="{% url 'login' %}" class="flex-shrink-0 flex items-center">
+                    <h1
+                        class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">
+                        <i class="fas fa-store mr-2 text-primary"></i>G-Business
+                    </h1>
+                </a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'plans' %}"
+                    class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Tarifs</a>
+                <a href="{% url 'about' %}"
+                    class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">À Propos</a>
+                <a href="{% url 'login' %}"
+                    class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition">Connexion</a>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto">
+    <main class="flex-1 overflow-y-auto pt-16">
         {% block content %}
         {% endblock %}
     </main>

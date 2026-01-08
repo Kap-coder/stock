@@ -17,6 +17,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     name = models.CharField(max_length=200)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    package_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(default=0)
     alert_threshold = models.IntegerField(default=5)
